@@ -1,3 +1,11 @@
+# Development files
+pi5_rag_test_installer*.sh
+pi5_rag_test_archive.zip
+
+# Configuration files (keep examples)
+config.env
+!config.env.example
+
 # Python
 __pycache__/
 *.py[cod]
@@ -21,28 +29,28 @@ wheels/
 *.egg
 MANIFEST
 
-# Virtual Environment
-.venv/
+# Virtual environments
+.env
+.venv
+env/
 venv/
 ENV/
-env/
+env.bak/
+venv.bak/
 
 # Vector Database Storage
 chroma_storage/
+chroma_db/
+chroma_data/
 qdrant_storage/
 qdrant_snapshots/
 
-# Environment Variables (production will have separate config)
-.env
-
-# Logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
-.cache/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
 # OS generated files
 .DS_Store
@@ -52,6 +60,20 @@ logs/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
 
 # Docker
 docker-compose.override.yml
