@@ -1,0 +1,10 @@
+[Unit]
+Description=Every-30-min Qdrant snapshot sync
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=30min
+Unit=qdrant-snapshot-sync.service
+
+[Install]
+WantedBy=timers.target

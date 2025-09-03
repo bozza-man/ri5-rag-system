@@ -1,0 +1,1 @@
+This is a smoke test document about escalation after-hours and the network incident playbook. The on-call engineer is paged and follows SEV-2 runbook steps.

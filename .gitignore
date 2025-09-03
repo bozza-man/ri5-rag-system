@@ -34,6 +34,13 @@ ENV/
 env.bak/
 venv.bak/
 
+# Vector Database Storage
+chroma_storage/
+chroma_db/
+chroma_data/
+qdrant_storage/
+qdrant_snapshots/
+
 # IDE
 .vscode/
 .idea/
@@ -41,7 +48,7 @@ venv.bak/
 *.swo
 *~
 
-# OS
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -59,10 +66,15 @@ logs/
 *.sqlite
 *.sqlite3
 
-# ChromaDB data
-chroma_db/
-chroma_data/
-
 # Temporary files
 *.tmp
 *.temp
+.cache/
+
+# Docker
+docker-compose.override.yml
+
+# Production specific
+production.env
+deploy.log
+backup/
