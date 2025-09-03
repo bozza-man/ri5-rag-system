@@ -30,6 +30,7 @@ SERVICE_NAME="${SERVICE_NAME:-pi5-rag-app}"
 
 validate_config() {
     log "Validating configuration..."
+    log_info "Checking configuration file and server connectivity"
     
     # Check if config file exists
     if [ ! -f "config.env" ]; then
@@ -37,6 +38,9 @@ validate_config() {
         log_info "Copy config.env.example to config.env and customize for your setup"
         return 0
     fi
+    
+    log_success "Configuration file found: config.env"
+    log_info "Loaded configuration for: ${PRODUCTION_USER}@${PRODUCTION_HOST}"
     
     # Validate required settings
     if [ "$PRODUCTION_HOST" = "pi5.local" ]; then
@@ -116,9 +120,11 @@ setup_dev_environment() {
 
 sync_to_production() {
     log "Syncing changes to production..."
+    log_info "Syncing to: ${PRODUCTION_USER}@${PRODUCTION_HOST}:${PRODUCTION_PATH}"
     
     # Push to GitHub
     log "Pushing changes to GitHub..."
+    log_info "Committing and pushing local changes to GitHub repository"
     git add .
     git commit -m "Development changes: $(date)" || log_info "No changes to commit"
     git push origin main
@@ -126,12 +132,14 @@ sync_to_production() {
     
     # Pull on production server
     log "Pulling changes on production server..."
+    log_info "Pulling latest changes from GitHub to ${PRODUCTION_PATH}"
     ssh "${PRODUCTION_USER}@${PRODUCTION_HOST}" "cd ${PRODUCTION_PATH} && git pull origin main"
     log_success "Changes pulled on production server"
 }
 
 pull_from_production() {
     log "Pulling latest changes from production..."
+    log_info "Pulling from GitHub repository to local development environment"
     
     # Pull from GitHub
     git pull origin main
@@ -171,11 +179,16 @@ show_status() {
 
 deploy_to_production() {
     log "Deploying to production..."
+    log_info "Target server: ${PRODUCTION_USER}@${PRODUCTION_HOST}"
+    log_info "Production path: ${PRODUCTION_PATH}"
+    log_info "Service name: ${SERVICE_NAME}"
     
     # Check if production directory exists, if not, set it up first
     log "Checking if production directory exists..."
+    log_info "Checking: ${PRODUCTION_PATH} on ${PRODUCTION_HOST}"
     if ! ssh "${PRODUCTION_USER}@${PRODUCTION_HOST}" "test -d ${PRODUCTION_PATH}"; then
         log "Production directory doesn't exist, setting up initial deployment..."
+        log_warning "Directory ${PRODUCTION_PATH} not found on ${PRODUCTION_HOST}"
         log "Please run the following command on your Pi5 to set up the initial deployment:"
         echo ""
         echo "  curl -sSL https://raw.githubusercontent.com/bozza-man/ri5-rag-system/main/deploy/production-deploy.sh | bash -s setup"
@@ -183,27 +196,31 @@ deploy_to_production() {
         log_warning "Or manually run: ./deploy/production-deploy.sh setup on the Pi5"
         return 1
     fi
+    log_success "Production directory exists: ${PRODUCTION_PATH}"
     
     # Sync changes
     sync_to_production
     
     # Restart services on production
     log "Restarting services on production..."
+    log_info "Restarting service: ${SERVICE_NAME} on ${PRODUCTION_HOST}"
     ssh "${PRODUCTION_USER}@${PRODUCTION_HOST}" "cd ${PRODUCTION_PATH} && sudo systemctl restart ${SERVICE_NAME}"
     log_success "Services restarted on production"
     
     # Check service status
     log "Checking service status..."
+    log_info "Checking status of ${SERVICE_NAME} on ${PRODUCTION_HOST}"
     ssh "${PRODUCTION_USER}@${PRODUCTION_HOST}" "sudo systemctl status ${SERVICE_NAME} --no-pager"
 }
 
 show_config() {
     log "Current Configuration:"
     echo ""
-    echo "Production Host: $PRODUCTION_HOST"
-    echo "Production User: $PRODUCTION_USER"
-    echo "Production Path: $PRODUCTION_PATH"
-    echo "Service Name: $SERVICE_NAME"
+    log_info "Production Server: ${PRODUCTION_USER}@${PRODUCTION_HOST}"
+    log_info "Production Path: ${PRODUCTION_PATH}"
+    log_info "Service Name: ${SERVICE_NAME}"
+    log_info "GitHub Repository: ${GITHUB_REPO:-bozza-man/ri5-rag-system}"
+    echo ""
     echo "Repository URL: $REPO_URL"
     echo ""
     if [ -f "config.env" ]; then
