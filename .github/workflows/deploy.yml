@@ -1,4 +1,4 @@
-name: Deploy to Pi5
+name: Deploy to Pi5 RAG System
 
 on:
   push:
@@ -17,7 +17,16 @@ jobs:
         username: ${{ secrets.PI5_USER }}
         key: ${{ secrets.PI5_SSH_KEY }}
         script: |
+          set -e
+          echo "Starting deployment to Pi5 RAG System..."
           cd /home/pi/ri5-rag-system
+          echo "Pulling latest changes..."
           git pull origin main
+          echo "Updating dependencies..."
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          echo "Restarting RAG service..."
           sudo systemctl restart pi5-rag-app
+          echo "Checking service status..."
           sudo systemctl status pi5-rag-app --no-pager
+          echo "Deployment completed successfully!"

@@ -7,17 +7,48 @@ set -euo pipefail
 BOLD="\033[1m"
 GREEN="\033[32m"
 BLUE="\033[34m"
+YELLOW="\033[33m"
 RESET="\033[0m"
 
 log() { echo -e "${BOLD}[dev-setup]${RESET} $1" >&2; }
 log_success() { echo -e "${GREEN}✓${RESET} $1" >&2; }
 log_info() { echo -e "${BLUE}ℹ${RESET} $1" >&2; }
+log_warning() { echo -e "${YELLOW}⚠${RESET} $1" >&2; }
 
-# Configuration
+# Load configuration
+if [ -f "config.env" ]; then
+    source config.env
+    log_info "Loaded configuration from config.env"
+fi
+
+# Configuration with defaults
 REPO_URL="https://github.com/bozza-man/ri5-rag-system.git"
 PRODUCTION_HOST="${PRODUCTION_HOST:-pi5.local}"  # Change this to your Pi5's hostname/IP
 PRODUCTION_USER="${PRODUCTION_USER:-pi}"         # Change this to your Pi5 username
 PRODUCTION_PATH="${PRODUCTION_PATH:-/home/pi/ri5-rag-system}"
+SERVICE_NAME="${SERVICE_NAME:-pi5-rag-app}"
+
+validate_config() {
+    log "Validating configuration..."
+    
+    # Check if config file exists
+    if [ ! -f "config.env" ]; then
+        log_warning "No config.env file found. Using defaults."
+        log_info "Copy config.env.example to config.env and customize for your setup"
+        return 0
+    fi
+    
+    # Validate required settings
+    if [ "$PRODUCTION_HOST" = "pi5.local" ]; then
+        log_warning "Using default hostname 'pi5.local'. Update config.env with your Pi5's IP"
+    fi
+    
+    if [ "$PRODUCTION_USER" = "pi" ]; then
+        log_info "Using default username 'pi'"
+    fi
+    
+    log_success "Configuration validated"
+}
 
 show_help() {
     cat << EOF
@@ -31,18 +62,22 @@ Commands:
   pull            Pull latest changes from production
   status          Show git status and sync status
   deploy          Deploy to production and restart services
+  config          Show current configuration
+  validate        Validate configuration
   help            Show this help message
 
-Environment Variables:
-  PRODUCTION_HOST     Production server hostname/IP (default: pi5.local)
-  PRODUCTION_USER     Production server username (default: pi)
-  PRODUCTION_PATH     Production server path (default: /home/pi/ri5-rag-system)
+Configuration:
+  Copy config.env.example to config.env and customize:
+  - PRODUCTION_HOST: Your Pi5's IP address (e.g., 192.168.1.100)
+  - PRODUCTION_USER: Username on Pi5 (usually 'pi')
+  - PRODUCTION_PATH: Deployment path (default: /home/pi/ri5-rag-system)
 
 Examples:
   $0 setup                    # Initial development setup
   $0 sync                     # Push changes to production
   $0 pull                     # Pull latest from production
-  PRODUCTION_HOST=192.168.1.100 $0 deploy  # Deploy to specific IP
+  $0 config                   # Show current configuration
+  $0 validate                 # Validate configuration
 EOF
 }
 
@@ -142,20 +177,39 @@ deploy_to_production() {
     
     # Restart services on production
     log "Restarting services on production..."
-    ssh "${PRODUCTION_USER}@${PRODUCTION_HOST}" "cd ${PRODUCTION_PATH} && sudo systemctl restart pi5-rag-app"
+    ssh "${PRODUCTION_USER}@${PRODUCTION_HOST}" "cd ${PRODUCTION_PATH} && sudo systemctl restart ${SERVICE_NAME}"
     log_success "Services restarted on production"
     
     # Check service status
     log "Checking service status..."
-    ssh "${PRODUCTION_USER}@${PRODUCTION_HOST}" "sudo systemctl status pi5-rag-app --no-pager"
+    ssh "${PRODUCTION_USER}@${PRODUCTION_HOST}" "sudo systemctl status ${SERVICE_NAME} --no-pager"
+}
+
+show_config() {
+    log "Current Configuration:"
+    echo ""
+    echo "Production Host: $PRODUCTION_HOST"
+    echo "Production User: $PRODUCTION_USER"
+    echo "Production Path: $PRODUCTION_PATH"
+    echo "Service Name: $SERVICE_NAME"
+    echo "Repository URL: $REPO_URL"
+    echo ""
+    if [ -f "config.env" ]; then
+        log_success "Configuration loaded from config.env"
+    else
+        log_warning "No config.env file found, using defaults"
+        log_info "Run: cp config.env.example config.env"
+    fi
 }
 
 main() {
     case "${1:-help}" in
         setup)
+            validate_config
             setup_dev_environment
             ;;
         sync)
+            validate_config
             sync_to_production
             ;;
         pull)
@@ -165,7 +219,14 @@ main() {
             show_status
             ;;
         deploy)
+            validate_config
             deploy_to_production
+            ;;
+        config)
+            show_config
+            ;;
+        validate)
+            validate_config
             ;;
         help|--help|-h)
             show_help

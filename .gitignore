@@ -2,6 +2,10 @@
 pi5_rag_test_installer*.sh
 pi5_rag_test_archive.zip
 
+# Configuration files (keep examples)
+config.env
+!config.env.example
+
 # Python
 __pycache__/
 *.py[cod]

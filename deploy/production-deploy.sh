@@ -19,6 +19,7 @@ log_warning() { echo -e "${YELLOW}⚠${RESET} $1" >&2; }
 REPO_URL="https://github.com/bozza-man/ri5-rag-system.git"
 DEPLOY_PATH="/home/pi/ri5-rag-system"
 SERVICE_NAME="pi5-rag-app"
+CHROMA_SERVICE_NAME="pi5-rag-chroma"
 
 setup_production() {
     log "Setting up production deployment..."
@@ -67,10 +68,10 @@ setup_production() {
 setup_systemd_service() {
     log "Setting up systemd service..."
     
-    # Create systemd service file
+    # Create systemd service file for ChromaDB RAG system
     sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null << EOF
 [Unit]
-Description=Pi5 RAG System
+Description=Pi5 RAG System (ChromaDB)
 After=network.target
 
 [Service]
@@ -78,9 +79,12 @@ Type=simple
 User=pi
 WorkingDirectory=${DEPLOY_PATH}
 Environment=PATH=${DEPLOY_PATH}/.venv/bin
+Environment=PYTHONPATH=${DEPLOY_PATH}
 ExecStart=${DEPLOY_PATH}/.venv/bin/python -m src.demo_query
 Restart=always
 RestartSec=10
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
@@ -96,7 +100,9 @@ After=network.target
 Type=oneshot
 User=pi
 WorkingDirectory=${DEPLOY_PATH}
-ExecStart=/bin/bash -c 'cd ${DEPLOY_PATH} && git pull origin main && source .venv/bin/activate && pip install -r requirements.txt'
+ExecStart=/bin/bash -c 'cd ${DEPLOY_PATH} && git pull origin main && source .venv/bin/activate && pip install -r requirements.txt && sudo systemctl restart ${SERVICE_NAME}'
+StandardOutput=journal
+StandardError=journal
 EOF
 
     # Create deployment timer
