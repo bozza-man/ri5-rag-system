@@ -18,13 +18,13 @@ log_warning() { echo -e "${YELLOW}⚠${RESET} $1" >&2; }
 # Configuration - Load from config.env if available
 if [ -f "config.env" ]; then
     source config.env
-    DEPLOY_PATH="${PRODUCTION_PATH:-/home/pi/ri5-rag-system}"
+    DEPLOY_PATH="${PRODUCTION_PATH:-/home/pi/ri5-rag-test}"
     SERVICE_NAME="${SERVICE_NAME:-pi5-rag-app}"
     CHROMA_SERVICE_NAME="${CHROMA_SERVICE_NAME:-pi5-rag-chroma}"
 else
     # Default configuration
     REPO_URL="https://github.com/bozza-man/ri5-rag-system.git"
-    DEPLOY_PATH="/home/pi/ri5-rag-system"
+    DEPLOY_PATH="/home/pi/ri5-rag-test"
     SERVICE_NAME="pi5-rag-app"
     CHROMA_SERVICE_NAME="pi5-rag-chroma"
 fi

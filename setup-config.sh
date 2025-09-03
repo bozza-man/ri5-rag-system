@@ -32,8 +32,8 @@ interactive_setup() {
     
     # Get deployment path
     log_info "Enter the deployment path on your Pi5:"
-    read -p "Path (default: /home/pi/ri5-rag-system): " pi5_path
-    pi5_path=${pi5_path:-/home/pi/ri5-rag-system}
+    read -p "Path (default: /home/pi/ri5-rag-test): " pi5_path
+    pi5_path=${pi5_path:-/home/pi/ri5-rag-test}
     
     # Create config file
     log "Creating configuration file..."
