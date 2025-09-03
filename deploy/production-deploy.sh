@@ -24,7 +24,7 @@ if [ -f "config.env" ]; then
 else
     # Default configuration
     REPO_URL="https://github.com/bozza-man/ri5-rag-system.git"
-    DEPLOY_PATH="/home/pi/ri5-rag-test"
+    DEPLOY_PATH="/home/danielborrowman/ri5-rag-test"
     SERVICE_NAME="pi5-rag-app"
     CHROMA_SERVICE_NAME="pi5-rag-chroma"
 fi
