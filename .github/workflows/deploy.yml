@@ -1,0 +1,23 @@
+name: Deploy to Pi5
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to Pi5
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.PI5_HOST }}
+        username: ${{ secrets.PI5_USER }}
+        key: ${{ secrets.PI5_SSH_KEY }}
+        script: |
+          cd /home/pi/ri5-rag-system
+          git pull origin main
+          sudo systemctl restart pi5-rag-app
+          sudo systemctl status pi5-rag-app --no-pager
