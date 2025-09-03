@@ -172,6 +172,18 @@ show_status() {
 deploy_to_production() {
     log "Deploying to production..."
     
+    # Check if production directory exists, if not, set it up first
+    log "Checking if production directory exists..."
+    if ! ssh "${PRODUCTION_USER}@${PRODUCTION_HOST}" "test -d ${PRODUCTION_PATH}"; then
+        log "Production directory doesn't exist, setting up initial deployment..."
+        log "Please run the following command on your Pi5 to set up the initial deployment:"
+        echo ""
+        echo "  curl -sSL https://raw.githubusercontent.com/bozza-man/ri5-rag-system/main/deploy/production-deploy.sh | bash -s setup"
+        echo ""
+        log_warning "Or manually run: ./deploy/production-deploy.sh setup on the Pi5"
+        return 1
+    fi
+    
     # Sync changes
     sync_to_production
     

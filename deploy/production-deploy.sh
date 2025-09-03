@@ -15,11 +15,21 @@ log_success() { echo -e "${GREEN}✓${RESET} $1" >&2; }
 log_error() { echo -e "${RED}✗${RESET} $1" >&2; }
 log_warning() { echo -e "${YELLOW}⚠${RESET} $1" >&2; }
 
-# Configuration
+# Configuration - Load from config.env if available
+if [ -f "config.env" ]; then
+    source config.env
+    DEPLOY_PATH="${PRODUCTION_PATH:-/home/pi/ri5-rag-system}"
+    SERVICE_NAME="${SERVICE_NAME:-pi5-rag-app}"
+    CHROMA_SERVICE_NAME="${CHROMA_SERVICE_NAME:-pi5-rag-chroma}"
+else
+    # Default configuration
+    REPO_URL="https://github.com/bozza-man/ri5-rag-system.git"
+    DEPLOY_PATH="/home/pi/ri5-rag-system"
+    SERVICE_NAME="pi5-rag-app"
+    CHROMA_SERVICE_NAME="pi5-rag-chroma"
+fi
+
 REPO_URL="https://github.com/bozza-man/ri5-rag-system.git"
-DEPLOY_PATH="/home/pi/ri5-rag-system"
-SERVICE_NAME="pi5-rag-app"
-CHROMA_SERVICE_NAME="pi5-rag-chroma"
 
 setup_production() {
     log "Setting up production deployment..."
