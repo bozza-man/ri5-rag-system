@@ -1,0 +1,10 @@
+[Unit]
+Description=Sync Qdrant snapshots to cloud via rclone
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Environment=RCLONE_REMOTE=b2:my-bucket/qdrant-snapshots
+WorkingDirectory=%h/pi5_rag_test
+ExecStart=/usr/bin/rclone sync qdrant_snapshots ${RCLONE_REMOTE} --checksum --transfers=4 --checkers=4 --contimeout=30s --timeout=1m --retries=3 --low-level-retries=5

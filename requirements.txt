@@ -1,0 +1,5 @@
+openai>=1.40.0
+qdrant-client>=1.11.1
+python-dotenv>=1.0.1
+tqdm>=4.66.4
+pypdf>=4.2.0
